@@ -6,11 +6,13 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Environment;
 import android.os.IBinder;
-import android.support.v7.app.AppCompatActivity;
+//import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.widget.TextView;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.openxc.VehicleManager;
 import com.openxc.measurements.EngineSpeed;

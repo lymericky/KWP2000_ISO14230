@@ -1,10 +1,13 @@
 package com.normence.datacollector;
 
+import android.Manifest;
+import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -12,13 +15,16 @@ import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
-import android.support.v7.app.AppCompatActivity;
+//import android.support.v7.app.AppCompatActivity;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 
 import com.github.pires.obd.commands.ObdCommand;
 import com.github.pires.obd.commands.SpeedCommand;
@@ -68,16 +74,17 @@ public class BluetoothConnectedActivity extends AppCompatActivity {
         @Override
         public void run() {
             try {
-                for(int i = 0; i < 1000; i++) {
+                for (int i = 0; i < 1000; i++) {
                     Log.d(TAG, "Execution times: " + i);
                     Execute();
                 }
-            }catch (InterruptedException e){
+            } catch (InterruptedException e) {
                 t.interrupt();
             }
         }
     });
 
+    @SuppressLint("NewApi")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -137,6 +144,10 @@ public class BluetoothConnectedActivity extends AppCompatActivity {
         /////////////////
 
         Log.d(TAG, "Stopping Bluetooth discovery.");
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[] {Manifest.permission.BLUETOOTH_SCAN}, 1);
+            return;
+        }
         MainActivity.mBluetoothAdapter.cancelDiscovery();
 
         /* File management */

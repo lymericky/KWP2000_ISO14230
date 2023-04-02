@@ -1,14 +1,17 @@
 package com.normence.datacollector;
 
 
+import android.Manifest;
+import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
+//import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -19,13 +22,18 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+
 import java.util.Set;
+
+@SuppressLint("NewApi")
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
     public static final String EXTRA_DEVICE_ADDRESS = "device_address";
 
     public static BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-//    private BluetoothSocket mBluetoothSocket;
+    //    private BluetoothSocket mBluetoothSocket;
     private ArrayAdapter<String> mPairedDevicesArrayAdapter;
     private ArrayAdapter<String> mNewDevicesArrayAdapter;
 
@@ -40,8 +48,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         // initializing adapter
-        mPairedDevicesArrayAdapter = new ArrayAdapter<>(MainActivity.this, R.layout.support_simple_spinner_dropdown_item);
-        mNewDevicesArrayAdapter = new ArrayAdapter<>(MainActivity.this, R.layout.support_simple_spinner_dropdown_item);
+        mPairedDevicesArrayAdapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_dropdown_item);
+        mNewDevicesArrayAdapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_dropdown_item);
 
         // Initializing the button to perform devices discovered
         mScanButton = (Button) findViewById(R.id.button_scan);
@@ -78,6 +86,10 @@ public class MainActivity extends AppCompatActivity {
             // enable Bluetooth
             if (!mBluetoothAdapter.isEnabled()) {
                 Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+                if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+                    requestPermissions(new String[]{Manifest.permission.BLUETOOTH_CONNECT}, 1);
+                    return;
+                }
                 startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
             }
 
@@ -113,12 +125,15 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-
     @Override
     protected void onDestroy() {
         super.onDestroy();
 
         if (mBluetoothAdapter != null) {
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{Manifest.permission.BLUETOOTH_SCAN}, 1);
+                return;
+            }
             mBluetoothAdapter.cancelDiscovery();
         }
 
@@ -126,6 +141,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void doDiscovery() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[]{Manifest.permission.BLUETOOTH_SCAN}, 1);
+            return;
+        }
         if (mBluetoothAdapter.isDiscovering()) {
             mBluetoothAdapter.cancelDiscovery();
         }
@@ -136,6 +155,10 @@ public class MainActivity extends AppCompatActivity {
     private OnItemClickListener mDeviceClickListener = new OnItemClickListener() {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{Manifest.permission.BLUETOOTH_SCAN}, 1);
+                return;
+            }
             mBluetoothAdapter.cancelDiscovery();
 
             // get the MAC address, which is the last 17 chars in the view
@@ -162,8 +185,12 @@ public class MainActivity extends AppCompatActivity {
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                 // ensure not to present repeated device
                 // p.s. position starts from '0'
-                for(int count = 1; count <= mNewDevicesArrayAdapter.getCount(); count++){
-                    if(mNewDevicesArrayAdapter.getItem(count - 1).equals(device.getName() + "\n" + device.getAddress())){
+                for (int count = 1; count <= mNewDevicesArrayAdapter.getCount(); count++) {
+                    if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+                        requestPermissions(new String[]{Manifest.permission.BLUETOOTH_CONNECT}, 1);
+                        return;
+                    }
+                    if (mNewDevicesArrayAdapter.getItem(count - 1).equals(device.getName() + "\n" + device.getAddress())) {
                         Log.d(TAG, "Same device found: " + device.getName());
                         return;
                     }
