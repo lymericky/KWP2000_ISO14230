@@ -1,0 +1,29 @@
+plugins {
+    id 'com.android.library'
+}
+android {
+    compileSdkVersion 33
+
+
+    defaultConfig {
+        minSdkVersion 19
+        targetSdkVersion 33
+        versionCode 1
+        versionName "1.0"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    testImplementation 'junit:junit:4.13.2'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation project(':obd-java-api')
+    //noinspection GradleDynamicVersion
+    implementation 'com.openxcplatform:library:6.1.6+'
+}

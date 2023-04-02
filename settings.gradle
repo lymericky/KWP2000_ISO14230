@@ -14,3 +14,5 @@ dependencyResolutionManagement {
 }
 rootProject.name = "KWP2000_ISO14230"
 include ':app'
+include ':obd-java-api'
+include ':data_collector'
